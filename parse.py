@@ -3,13 +3,14 @@ import xmltodict, json
 import xml.etree.ElementTree as ET
 import requests
 import re
+import csv
 
 def get_data():
     # this reads in the link and write the content of the data into a json file
     xml_file = open('result.txt', 'w')
 
     # using urllib
-    url =  urllib.request.urlopen("http://redfish.dmtf.org/schemas/v1/ComputerSystem_v1.xml")
+    url =  urllib.request.urlopen("http://redfish.dmtf.org/schemas/v1/ActionInfo_v1.xml")
     bytecontent = url.read()
     str_type_content = bytecontent.decode("utf-8")
     xml_file.write(str_type_content)
@@ -31,11 +32,29 @@ def get_data():
 def parse(xmlfile):
     tree = ET.parse(xmlfile)
     root = tree.getroot()
-    print(root.attrib)
 
+   # this gets all the tag Schema, EntityType, Annotation, Record, PropertyValue...
+    for elem in root.iter('{http://docs.oasis-open.org/odata/ns/edm}EntityType'):
+        # print(elem.tag)
+        # output = elem.attrib["String"]
+        if "String" in elem.attrib:
+        
+            output = elem.attrib["String"]
+        # print(elem.attrib)
+            print(output)
+        else:
+            print("-")
+
+
+    # for elem in root.findall("{http://docs.oasis-open.org/odata/ns/edm}EntityType[Name='ActionInfo']"):
+    #     print("hi")
+    #     print(elem.attrib)
     
 
-    
+      # print(root.attrib)
+    # this gets only the Reference stuff
+    # for child in root:
+    #     print(child.tag, child.attrib)
 
 def main():
 
