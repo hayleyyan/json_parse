@@ -3,7 +3,7 @@ import xmltodict, json
 import xml.etree.ElementTree as ET
 import requests
 import re
-import csv
+import xlsxwriter
 
 def get_data():
     # this reads in the link and write the content of the data into a json file
@@ -34,27 +34,23 @@ def parse(xmlfile):
     root = tree.getroot()
 
    # this gets all the tag Schema, EntityType, Annotation, Record, PropertyValue...
+    entity_row = []
+    
     for elem in root.iter('{http://docs.oasis-open.org/odata/ns/edm}EntityType'):
-        # print(elem.tag)
-        # output = elem.attrib["String"]
-        if "String" in elem.attrib:
-        
-            output = elem.attrib["String"]
-        # print(elem.attrib)
-            print(output)
+        if "Name" in elem.attrib:
+            entity_name = elem.attrib["Name"]
+            entity_row.append(entity_name)
         else:
             print("-")
-
-
-    # for elem in root.findall("{http://docs.oasis-open.org/odata/ns/edm}EntityType[Name='ActionInfo']"):
-    #     print("hi")
-    #     print(elem.attrib)
     
+    workbook = xlsxwriter.Workbook('result.xlsx')
+    worksheet = workbook.add_worksheet()
+  
+    worksheet.write_column(1,0,entity_row)
+    print(entity_row)
 
-      # print(root.attrib)
-    # this gets only the Reference stuff
-    # for child in root:
-    #     print(child.tag, child.attrib)
+    workbook.close()
+
 
 def main():
 
