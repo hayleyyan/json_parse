@@ -35,19 +35,41 @@ def parse(xmlfile):
 
    # this gets all the tag Schema, EntityType, Annotation, Record, PropertyValue...
     entity_row = []
-    
+    basetype_row = []
+    description_row = []
     for elem in root.iter('{http://docs.oasis-open.org/odata/ns/edm}EntityType'):
         if "Name" in elem.attrib:
             entity_name = elem.attrib["Name"]
             entity_row.append(entity_name)
-        else:
-            print("-")
     
+        if "BaseType" in elem.attrib:
+            basetype = elem.attrib["BaseType"]
+            # print(basetype_row)
+            basetype_row.append(basetype)
+        # for description 
+        for sub_elem in elem.iter('{http://docs.oasis-open.org/odata/ns/edm}Annotation'):
+            term = sub_elem.attrib["Term"] 
+            if term == "OData.LongDescription":
+                long_description = sub_elem.attrib["String"]
+                print(long_description)
+                description_row.append(long_description)
+
+            elif term == "OData.Description":
+                long_description = sub_elem.attrib["String"]
+                print(long_description)
+                description_row.append(long_description)
+            else: 
+                long_description = "-"
+                print(long_description)
+                description_row.append(long_description)
+            
     workbook = xlsxwriter.Workbook('result.xlsx')
     worksheet = workbook.add_worksheet()
-  
+   
     worksheet.write_column(1,0,entity_row)
-    print(entity_row)
+    worksheet.write_column(1,1,basetype_row)
+    worksheet.write_column(1,2,description_row)
+    # print(entity_row)
 
     workbook.close()
 
