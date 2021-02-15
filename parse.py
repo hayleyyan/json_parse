@@ -10,7 +10,7 @@ def get_data():
     xml_file = open('result.txt', 'w')
 
     # using urllib
-    url =  urllib.request.urlopen("http://redfish.dmtf.org/schemas/v1/ActionInfo_v1.xml")
+    url =  urllib.request.urlopen("http://redfish.dmtf.org/schemas/v1/Chassis_v1.xml")
     bytecontent = url.read()
     str_type_content = bytecontent.decode("utf-8")
     xml_file.write(str_type_content)
@@ -33,10 +33,11 @@ def parse(xmlfile):
     tree = ET.parse(xmlfile)
     root = tree.getroot()
 
-   # this gets all the tag Schema, EntityType, Annotation, Record, PropertyValue...
-    entity_row = []
-    basetype_row = []
-    description_row = []
+   # Below is parsing everything inside EntityType Tag
+    entity_row, basetype_row, description_row, property_name_row = ([] for i in range(4))
+    # basetype_row = []
+    # description_row = []
+    # property_name_row = []
     for elem in root.iter('{http://docs.oasis-open.org/odata/ns/edm}EntityType'):
         if "Name" in elem.attrib:
             entity_name = elem.attrib["Name"]
@@ -46,21 +47,30 @@ def parse(xmlfile):
             basetype = elem.attrib["BaseType"]
             # print(basetype_row)
             basetype_row.append(basetype)
+            
+        # property name
+        for property_tag in elem.iter('{http://docs.oasis-open.org/odata/ns/edm}Property'):
+            if "Name" in elem.attrib:
+                property_name = property_tag.attrib["Name"]
+                property_name_row.append(property_name)
+            else:
+                property_name_row.append("-")
+        
         # for description 
-        for sub_elem in elem.iter('{http://docs.oasis-open.org/odata/ns/edm}Annotation'):
-            term = sub_elem.attrib["Term"] 
+        for annotation in elem.iter('{http://docs.oasis-open.org/odata/ns/edm}Annotation'):
+            term = annotation.attrib["Term"] 
             if term == "OData.LongDescription":
-                long_description = sub_elem.attrib["String"]
-                print(long_description)
+                long_description = annotation.attrib["String"]
+                # print(long_description)
                 description_row.append(long_description)
 
             elif term == "OData.Description":
-                long_description = sub_elem.attrib["String"]
-                print(long_description)
+                long_description = annotation.attrib["String"]
+                # print(long_description)
                 description_row.append(long_description)
             else: 
                 long_description = "-"
-                print(long_description)
+                # print(long_description)
                 description_row.append(long_description)
             
     workbook = xlsxwriter.Workbook('result.xlsx')
@@ -68,8 +78,8 @@ def parse(xmlfile):
    
     worksheet.write_column(1,0,entity_row)
     worksheet.write_column(1,1,basetype_row)
-    worksheet.write_column(1,2,description_row)
-    # print(entity_row)
+    worksheet.write_column(1,2,property_name_row)
+    worksheet.write_column(1,3,description_row)
 
     workbook.close()
 
@@ -82,13 +92,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# with open('result.json', 'r') as fin:
-#     data = json.load(fin)
-#     for i in data["edmx:Edmx"]["edmx:DataServices"]["Schema"]:
-#         # namespace = tag["@Namespace"]
-#         # name = tag["EntityType"]["@Name"]
-#         # basetype = tag["EntityType"]["@BaseType"]
-#         # term = tag["Annotation"]["@Term"]
-
-
