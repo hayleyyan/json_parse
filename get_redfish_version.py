@@ -1,11 +1,12 @@
-import requests, json, re
+import requests, json, re, getpass
 from requests.auth import HTTPBasicAuth
 
+# Use python3 to run this script
 
 def main():
     bmc_input = input("Enter BMC IP address or DNS: ")
     username = input("Enter redfish username: ")
-    pwd = input("Enter redfish password: ")
+    pwd = getpass.getpass("Enter redfish password: ")
 
     bmc_ip = f"https://{bmc_input}/redfish/v1/JsonSchemas"
     response = requests.get(bmc_ip, auth=HTTPBasicAuth(username, pwd), verify=False)
